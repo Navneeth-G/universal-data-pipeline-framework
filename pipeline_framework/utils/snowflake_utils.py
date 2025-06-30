@@ -143,6 +143,37 @@ class SnowflakeQueryClient:
        finally:
            cursor.close()
 
+   def insert_one_record_only(self, record: Dict[str, Any], table: Optional[str] = None) -> Dict[str, Any]:
+       """Insert a single record into Snowflake table"""
+       target_table = table or self.config['table']
+       conn = self.get_connection()
+       
+       try:
+            columns = ', '.join(record.keys())
+            placeholders = ', '.join([f"%({k})s" for k in record.keys()])
+
+            query = f"INSERT INTO {target_table} ({columns}) VALUES ({placeholders})"
+           self.execute_control_command(query, record)
+           
+           return {"query_id": cursor.sfqid, "num_rows_inserted": cursor.rowcount}
+
+       except Exception as error:
+           raise RuntimeError(f"Insert failed: {error}") from error
+
+               raise RuntimeError(f"Bulk insert failed for table {target_table}")
+           
+           return {
+               "query_id": query_id,
+               "num_rows_inserted": nrows
+           }
+           
+       except Exception as error:
+           raise RuntimeError(f"Bulk insert failed: {error}") from error
+
+
+
+
+
    def bulk_insert_records(self, df: DataFrame, table: Optional[str] = None) -> Dict[str, Any]:
        """Bulk insert DataFrame to Snowflake table"""
        target_table = table or self.config['table']

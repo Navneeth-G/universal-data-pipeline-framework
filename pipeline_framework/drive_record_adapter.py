@@ -149,10 +149,8 @@ def insert_drive_record(record: Dict[str, Any], final_config: Dict[str, Any]) ->
 
                 
         with SnowflakeQueryClient(snowflake_creds, snowflake_config) as sf_client:
-            df = pd.DataFrame([record_copy])
-            result = sf_client.bulk_insert_records(df)
+            result = sf_client.insert_one_record_only(record_copy)
 
-            
             log.info(
                 "Drive record inserted successfully",
                 log_key="Drive Record Insert",
