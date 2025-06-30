@@ -9,7 +9,12 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 # Add pipeline_framework to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
+
+
+PROJECT_ROOT = "/opt/airflow/dags/repo/ingestion_pipeline_01"
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 
 from pipeline_framework.configs_handler_func import get_final_config
 from pipeline_framework.task_handlers import (
@@ -23,8 +28,8 @@ from pipeline_framework.task_handlers import (
 )
 
 # Load config
-root_project_path = os.path.join(os.path.dirname(__file__), '../../..')
-drive_defaults_relative_path = "pipeline_logic/config/drive_table_defaults.json"
+root_project_path = PROJECT_ROOT
+drive_defaults_relative_path = "pipeline_logic/drive_table_defaults.json"
 index_config_relative_path = "projects/group_name/name/name.json"
 
 final_config = get_final_config(
