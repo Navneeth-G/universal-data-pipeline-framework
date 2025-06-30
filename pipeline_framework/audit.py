@@ -22,7 +22,7 @@ def audit(final_config, record):
        
        if result:
            # Success is handled inside audit_data_transfer
-           log.info("Audit completed successfully", pipeline_id=record['pipeline_id'])
+           log.info("Audit completed successfully", PIPELINE_ID=record['PIPELINE_ID'])
        
        return result
        
@@ -30,18 +30,18 @@ def audit(final_config, record):
        # Reset audit phase on failure
 
        record.update({
-           'audit_status': 'PENDING',
-           'audit_start_time': None,
-           'audit_end_time': None,
-           'audit_result': None,
-           'pipeline_status': 'PENDING',
-           'pipeline_start_time': None,
-           'pipeline_end_time': None,
-           'dag_run_id': None,
-           'retry_attempt': record.get('retry_attempt', 0) + 1
+           'AUDIT_STATUS': 'PENDING',
+           'AUDIT_START_TIME': None,
+           'AUDIT_END_TIME': None,
+           'AUDIT_RESULT': None,
+           'PIPELINE_STATUS': 'PENDING',
+           'PIPELINE_START_TIME': None,
+           'PIPELINE_END_TIME': None,
+           'DAG_RUN_ID': None,
+           'RETRY_ATTEMPT': record.get('RETRY_ATTEMPT', 0) + 1
        })
        update_record_in_drive_table(record, final_config)
-       log.exception("Audit failed", pipeline_id=record['pipeline_id'])
+       log.exception("Audit failed", PIPELINE_ID=record['PIPELINE_ID'])
        raise
 
 

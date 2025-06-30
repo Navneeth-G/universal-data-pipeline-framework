@@ -48,7 +48,7 @@ def build_elasticdump_command(final_config: Dict[str, Any], record: Dict[str, An
     epoch_time = get_current_epoch_time(timezone)
     
     # Build clean S3 output path
-    s3_uri_complete_path = f"{record['stage_sub_category']}{final_config['index_pattern']}_{epoch_time}.json"
+    s3_uri_complete_path = f"{record['STAGE_SUB_CATEGORY']}{final_config['index_pattern']}_{epoch_time}.json"
     
     cmd = [
         "elasticdump",
@@ -76,7 +76,7 @@ def execute_transfer(cmd: list, record: Dict[str, Any], final_config: Dict[str, 
         
         log.info(
             "Starting elasticdump ES→S3 transfer (large dataset mode)",
-            pipeline_id=record['pipeline_id'],
+            PIPELINE_ID=record['PIPELINE_ID'],
             timeout_hours=timeout_seconds/3600
         )
         
@@ -104,7 +104,7 @@ def execute_transfer(cmd: list, record: Dict[str, Any], final_config: Dict[str, 
                 if (line_count - last_progress_log >= 100) or any(keyword in line.lower() for keyword in ['written', 'dumped', 'transferred', 'complete']):
                     log.info(
                         f"Elasticdump progress: {line}",
-                        pipeline_id=record['pipeline_id'],
+                        PIPELINE_ID=record['PIPELINE_ID'],
                         lines_processed=line_count
                     )
                     last_progress_log = line_count
@@ -114,14 +114,14 @@ def execute_transfer(cmd: list, record: Dict[str, Any], final_config: Dict[str, 
         if process.returncode == 0:
             log.info(
                 "Large elasticdump transfer completed successfully",
-                pipeline_id=record['pipeline_id'],
+                PIPELINE_ID=record['PIPELINE_ID'],
                 total_output_lines=line_count
             )
             return True
         else:
             log.error(
                 "Large elasticdump transfer failed",
-                pipeline_id=record['pipeline_id'],
+                PIPELINE_ID=record['PIPELINE_ID'],
                 return_code=process.returncode,
                 total_output_lines=line_count
             )
@@ -131,14 +131,14 @@ def execute_transfer(cmd: list, record: Dict[str, Any], final_config: Dict[str, 
         process.kill()
         log.error(
             "Elasticdump timeout after extended period",
-            pipeline_id=record['pipeline_id'],
+            PIPELINE_ID=record['PIPELINE_ID'],
             timeout_hours=timeout_seconds/3600
         )
         return False
     except Exception as e:
         log.exception(
             "Large elasticdump execution failed",
-            pipeline_id=record['pipeline_id']
+            PIPELINE_ID=record['PIPELINE_ID']
         )
         return False
 
@@ -151,7 +151,7 @@ def transfer_elasticsearch_to_s3(final_config: Dict[str, Any], record: Dict[str,
     except Exception as e:
         log.exception(
             "Error in elasticsearch to S3 transfer",
-            pipeline_id=record['pipeline_id']
+            PIPELINE_ID=record['PIPELINE_ID']
         )
         return False
 

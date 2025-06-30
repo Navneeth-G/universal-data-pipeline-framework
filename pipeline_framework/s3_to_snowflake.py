@@ -33,7 +33,7 @@ def execute_snowflake_task(final_config: Dict[str, Any], record: Dict[str, Any])
         
         log.info(
             f"Snowflake task executed: {task_name}",
-            pipeline_id=record['pipeline_id'],
+            PIPELINE_ID=record['PIPELINE_ID'],
             query_id=result['query_id']
         )
         
@@ -45,7 +45,7 @@ def transfer_s3_to_snowflake(final_config: Dict[str, Any], record: Dict[str, Any
     try:
         log.info(
             "Starting Snowflake task execution",
-            pipeline_id=record['pipeline_id'],
+            PIPELINE_ID=record['PIPELINE_ID'],
             task_name=final_config['snowflake_task_name']
         )
         
@@ -54,14 +54,14 @@ def transfer_s3_to_snowflake(final_config: Dict[str, Any], record: Dict[str, Any
         if success:
             log.info(
                 "Snowflake task triggered - waiting 2 minutes for snowpipe completion",
-                pipeline_id=record['pipeline_id']
+                PIPELINE_ID=record['PIPELINE_ID']
             )
             
             time.sleep(120)  # 2 minutes
             
             log.info(
                 "Snowpipe wait completed - transfer assumed successful",
-                pipeline_id=record['pipeline_id']
+                PIPELINE_ID=record['PIPELINE_ID']
             )
         
         return success
@@ -69,7 +69,7 @@ def transfer_s3_to_snowflake(final_config: Dict[str, Any], record: Dict[str, Any
     except Exception as e:
         log.exception(
             "Snowflake task execution failed",
-            pipeline_id=record['pipeline_id']
+            PIPELINE_ID=record['PIPELINE_ID']
         )
         raise
 

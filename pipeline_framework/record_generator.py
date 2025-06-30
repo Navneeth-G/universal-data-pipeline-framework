@@ -3,13 +3,13 @@
 """
 RECORD GENERATOR FLOW:
 1. Parse x_time_back and granularity from final_config
-2. Calculate target_day = (now - x_time_back).date()
-3. Check if existing records exist for target_day
-4. If none: start_time = start_of_target_day + granularity
+2. Calculate TARGET_DAY = (now - x_time_back).date()
+3. Check if existing records exist for TARGET_DAY
+4. If none: start_time = start_of_TARGET_DAY + granularity
 5. If exist: start_time = max(end_time) from existing records
 6. Calculate end_time = start_time + granularity
-7. Apply boundary check: cap end_time at target_day_end (next day 00:00)
-8. If start_time >= target_day_end: return 0 (no record created)
+7. Apply boundary check: cap end_time at TARGET_DAY_end (next day 00:00)
+8. If start_time >= TARGET_DAY_end: return 0 (no record created)
 9. Create record from drive_table_default_record template
 10. Update with time fields and generate unique IDs
 11. Insert record and return 1
@@ -97,7 +97,7 @@ def create_base_record(final_config):
     return record
 
 
-def update_time_fields(record, start_time_iso, end_time_iso, target_day, final_config):
+def update_time_fields(record, start_time_iso, end_time_iso, TARGET_DAY, final_config):
     """Update record with time-related fields (all as ISO strings)"""
     timezone = final_config["timezone"]
     current_time = get_current_time_iso(timezone)
@@ -109,28 +109,28 @@ def update_time_fields(record, start_time_iso, end_time_iso, target_day, final_c
     # Build S3 path components
     s3_prefix_list = final_config["s3_prefix_list"]
     s3_prefix_subpath = '/'.join(s3_prefix_list)
-    s3_uri = f"s3://{final_config['s3_bucket']}/{s3_prefix_subpath}/{target_day}/{hour_min}/"
+    s3_uri = f"s3://{final_config['s3_bucket']}/{s3_prefix_subpath}/{TARGET_DAY}/{hour_min}/"
 
 
     # Calculate actual granularity achieved
     actual_duration_seconds = calculate_duration_seconds(start_time_iso, end_time_iso)
     record['granularity'] = seconds_to_time_string(actual_duration_seconds)
     record.update({
-    'window_start_time': start_time_iso,
-    'window_end_time': end_time_iso,
-    'target_day': target_day,
-    'record_first_created_time': current_time,
-    'record_last_updated_time': current_time,
-    'source_category': final_config["index_group"],
-    'source_sub_category': final_config["index_name"],
+    'WINDOW_START_TIME': start_time_iso,
+    'WINDOW_END_TIME': end_time_iso,
+    'TARGET_DAY': TARGET_DAY,
+    'RECORD_FIRST_CREATED_TIME': current_time,
+    'RECORD_LAST_UPDATED_TIME': current_time,
+    'SOURCE_CATEGORY': final_config["index_group"],
+    'SOURCE_SUB_CATEGORY': final_config["index_name"],
 
-    'stage_category': final_config["s3_bucket"],
-    'stage_sub_category': s3_uri,
+    'STAGE_CATEGORY': final_config["s3_bucket"],
+    'STAGE_SUB_CATEGORY': s3_uri,
     
-    'target_category': f"{final_config['target_database']}.{final_config['target_schema']}.{final_config['target_table']}",
-    'target_sub_category': f"{s3_uri}%",
+    'TARGET_CATEGORY': f"{final_config['target_database']}.{final_config['target_schema']}.{final_config['target_table']}",
+    'TARGET_SUB_CATEGORY': f"{s3_uri}%",
 
-    'miscellaneous': {"error_message":""}
+    'MISCELLANEOUS': None
     })
 
     
@@ -141,30 +141,30 @@ def generate_pipeline_id(record, final_config):
     """Generate unique IDs using name/category/subcategory + time window"""
     
     # Get time window strings for ID generation
-    window_start_str = record['window_start_time']
-    window_end_str = record['window_end_time']
+    window_start_str = record['WINDOW_START_TIME']
+    window_end_str = record['WINDOW_END_TIME']
     
-    # Generate source_id
-    source_hash_input = f"{record.get('source_name', 'unknown')}*{record.get('source_category', '')}*{record.get('source_sub_category', '')}*{window_start_str}*{window_end_str}"
-    source_id = hashlib.md5(source_hash_input.encode()).hexdigest()[:16]
+    # Generate SOURCE_ID
+    source_hash_input = f"{record.get('SOURCE_NAME', 'unknown')}*{record.get('SOURCE_CATEGORY', '')}*{record.get('SOURCE_SUB_CATEGORY', '')}*{window_start_str}*{window_end_str}"
+    SOURCE_ID = hashlib.md5(source_hash_input.encode()).hexdigest()[:16]
     
-    # Generate stage_id  
-    stage_hash_input = f"{record.get('stage_name', 'unknown')}*{record.get('stage_category', '')}*{record.get('stage_sub_category', '')}*{window_start_str}*{window_end_str}"
-    stage_id = hashlib.md5(stage_hash_input.encode()).hexdigest()[:16]
+    # Generate STAGE_ID  
+    stage_hash_input = f"{record.get('STAGE_NAME', 'unknown')}*{record.get('STAGE_CATEGORY', '')}*{record.get('STAGE_SUB_CATEGORY', '')}*{window_start_str}*{window_end_str}"
+    STAGE_ID = hashlib.md5(stage_hash_input.encode()).hexdigest()[:16]
     
-    # Generate target_id
-    target_hash_input = f"{record.get('target_name', 'unknown')}*{record.get('target_category', '')}*{record.get('target_sub_category', '')}*{window_start_str}*{window_end_str}"
-    target_id = hashlib.md5(target_hash_input.encode()).hexdigest()[:16]
+    # Generate TARGET_ID
+    target_hash_input = f"{record.get('TARGET_NAME', 'unknown')}*{record.get('TARGET_CATEGORY', '')}*{record.get('TARGET_SUB_CATEGORY', '')}*{window_start_str}*{window_end_str}"
+    TARGET_ID = hashlib.md5(target_hash_input.encode()).hexdigest()[:16]
     
-    # Generate pipeline_id from the three IDs
-    pipeline_hash_input = f"{source_id}*{stage_id}*{target_id}"
-    pipeline_id = hashlib.md5(pipeline_hash_input.encode()).hexdigest()[:16]
+    # Generate PIPELINE_ID from the three IDs
+    pipeline_hash_input = f"{SOURCE_ID}*{STAGE_ID}*{TARGET_ID}"
+    PIPELINE_ID = hashlib.md5(pipeline_hash_input.encode()).hexdigest()[:16]
     
     # Update record with all IDs
-    record['source_id'] = source_id
-    record['stage_id'] = stage_id  
-    record['target_id'] = target_id
-    record['pipeline_id'] = pipeline_id
+    record['SOURCE_ID'] = SOURCE_ID
+    record['STAGE_ID'] = STAGE_ID  
+    record['TARGET_ID'] = TARGET_ID
+    record['PIPELINE_ID'] = PIPELINE_ID
     
     return record
 
@@ -184,24 +184,24 @@ def record_generator(final_config, **context):
         
         # Calculate target day using time utility
         now_iso = get_current_time_iso(timezone)
-        target_day_start_iso = add_duration_to_iso(now_iso, -x_time_back_seconds)
-        target_day = get_date_only(target_day_start_iso)
+        TARGET_DAY_start_iso = add_duration_to_iso(now_iso, -x_time_back_seconds)
+        TARGET_DAY = get_date_only(TARGET_DAY_start_iso)
         
         log.info(
             f"Calculated target day from current time",
             log_key="Record Generator",
             status="TARGET_DAY_CALCULATED",
-            target_day=target_day,
+            TARGET_DAY=TARGET_DAY,
             x_time_back=final_config['x_time_back'],
             granularity=final_config['granularity']
         )
         
-        existing_max_end_time = get_existing_drive_records(final_config, target_day)
+        existing_max_end_time = get_existing_drive_records(final_config, TARGET_DAY)
         
         if not existing_max_end_time:
             # Start from beginning of target day + granularity
-            target_day_start = get_start_of_day_iso(target_day, timezone)
-            start_time_iso = target_day_start
+            TARGET_DAY_start = get_start_of_day_iso(TARGET_DAY, timezone)
+            start_time_iso = TARGET_DAY_start
             log.info(
                 "No existing records found - starting fresh",
                 log_key="Record Generator",
@@ -220,11 +220,11 @@ def record_generator(final_config, **context):
         
         # Calculate end time
         end_time_iso = add_duration_to_iso(start_time_iso, granularity_seconds)
-        target_day_end_iso = get_end_of_day_iso(target_day, timezone)
+        TARGET_DAY_end_iso = get_end_of_day_iso(TARGET_DAY, timezone)
         
         # Boundary check
-        if compare_times(end_time_iso, target_day_end_iso) > 0:
-            end_time_iso = target_day_end_iso
+        if compare_times(end_time_iso, TARGET_DAY_end_iso) > 0:
+            end_time_iso = TARGET_DAY_end_iso
             log.warning(
                 "End time exceeds target day boundary - capping at midnight",
                 log_key="Record Generator",
@@ -234,20 +234,20 @@ def record_generator(final_config, **context):
             )
         
         # Check if past target day
-        if compare_times(start_time_iso, target_day_end_iso) >= 0:
+        if compare_times(start_time_iso, TARGET_DAY_end_iso) >= 0:
             log.info(
                 "Start time is past target day - no record needed",
                 log_key="Record Generator",
                 status="PAST_TARGET_DAY",
                 start_time=start_time_iso,
-                target_day_end=target_day_end_iso
+                TARGET_DAY_end=TARGET_DAY_end_iso
             )
             context['task_instance'].xcom_push(key='generated_count', value=0)
             return 0
         
         # Create and populate record
         record = create_base_record(final_config)
-        record = update_time_fields(record, start_time_iso, end_time_iso, target_day, final_config)
+        record = update_time_fields(record, start_time_iso, end_time_iso, TARGET_DAY, final_config)
         record = generate_pipeline_id(record, final_config)
         insert_drive_record(record, final_config)
         
@@ -255,7 +255,7 @@ def record_generator(final_config, **context):
             "Record generation completed successfully",
             log_key="Record Generator",
             status="SUCCESS",
-            pipeline_id=record['pipeline_id'],
+            PIPELINE_ID=record['PIPELINE_ID'],
             window_start=start_time_iso,
             window_end=end_time_iso
         )
@@ -293,35 +293,35 @@ def validate_record(final_config, **context):
             )
             raise AirflowSkipException("No record to validate")
         
-        # Get the actual record (need to fetch from drive table by latest pipeline_id)
+        # Get the actual record (need to fetch from drive table by latest PIPELINE_ID)
         # For now, we'll reconstruct the logic - this could be optimized
         timezone = final_config["timezone"]
         x_time_back_seconds = parse_time_string(final_config['x_time_back'])
         granularity_seconds = parse_time_string(final_config['granularity'])
         
         now_iso = get_current_time_iso(timezone)
-        target_day_start_iso = add_duration_to_iso(now_iso, -x_time_back_seconds)
-        target_day = get_date_only(target_day_start_iso)
+        TARGET_DAY_start_iso = add_duration_to_iso(now_iso, -x_time_back_seconds)
+        TARGET_DAY = get_date_only(TARGET_DAY_start_iso)
         
-        existing_max_end_time = get_existing_drive_records(final_config, target_day)
+        existing_max_end_time = get_existing_drive_records(final_config, TARGET_DAY)
         
         if not existing_max_end_time:
-            target_day_start = get_start_of_day_iso(target_day, timezone)
-            start_time_iso = add_duration_to_iso(target_day_start, granularity_seconds)
+            TARGET_DAY_start = get_start_of_day_iso(TARGET_DAY, timezone)
+            start_time_iso = add_duration_to_iso(TARGET_DAY_start, granularity_seconds)
         else:
             start_time_iso = to_iso_string(existing_max_end_time, timezone)
         
         end_time_iso = add_duration_to_iso(start_time_iso, granularity_seconds)
-        target_day_end_iso = get_end_of_day_iso(target_day, timezone)
+        TARGET_DAY_end_iso = get_end_of_day_iso(TARGET_DAY, timezone)
         
-        if compare_times(end_time_iso, target_day_end_iso) > 0:
-            end_time_iso = target_day_end_iso
+        if compare_times(end_time_iso, TARGET_DAY_end_iso) > 0:
+            end_time_iso = TARGET_DAY_end_iso
         
         # Create record object for validation
         record = {
-            'window_start_time': start_time_iso,
-            'window_end_time': end_time_iso,
-            'target_day': target_day
+            'WINDOW_START_TIME': start_time_iso,
+            'WINDOW_END_TIME': end_time_iso,
+            'TARGET_DAY': TARGET_DAY
         }
         
         # CHECK 1: Future data check

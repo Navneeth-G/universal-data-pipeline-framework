@@ -97,11 +97,11 @@ def elasticsearch_count(final_config: Dict[str, Any], record: Dict[str, Any]) ->
         )
         count = result['count']
 
-        log.info(f"Elasticsearch count: {count}", pipeline_id=record['pipeline_id'])
+        log.info(f"Elasticsearch count: {count}", PIPELINE_ID=record['PIPELINE_ID'])
         return count
 
     except Exception as e:
-        log.exception("Elasticsearch count failed", pipeline_id=record['pipeline_id'])
+        log.exception("Elasticsearch count failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 def elasticsearch_check_exists(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
@@ -110,7 +110,7 @@ def elasticsearch_check_exists(final_config: Dict[str, Any], record: Dict[str, A
         count = elasticsearch_count(final_config, record)
         return count > 0
     except Exception as e:
-        log.exception("Elasticsearch exists check failed", pipeline_id=record['pipeline_id'])
+        log.exception("Elasticsearch exists check failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 

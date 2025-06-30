@@ -39,7 +39,7 @@ def s3_count(final_config: Dict[str, Any], record: Dict[str, Any]) -> int:
         s3 = s3_connection(final_config)
         
         # Get S3 path from record
-        s3_path = record['stage_sub_category']
+        s3_path = record['STAGE_SUB_CATEGORY']
         if not s3_path.startswith('s3://'):
             raise ValueError(f"Invalid S3 path format: {s3_path}")
         
@@ -59,20 +59,20 @@ def s3_count(final_config: Dict[str, Any], record: Dict[str, Any]) -> int:
             if 'Contents' in page:
                 count += len(page['Contents'])  # Counting NUMBER OF FILES
         
-        log.info(f"S3 file count: {count}", pipeline_id=record['pipeline_id'])
+        log.info(f"S3 file count: {count}", PIPELINE_ID=record['PIPELINE_ID'])
         return count
         
     except Exception as e:
-        log.exception("S3 count failed", pipeline_id=record['pipeline_id'])
+        log.exception("S3 count failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 def s3_check_exists(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
-    """Check if objects exist in S3 using stage_sub_category from record"""
+    """Check if objects exist in S3 using STAGE_SUB_CATEGORY from record"""
     try:
         s3 = s3_connection(final_config)
         
         # Get S3 path from record
-        s3_path = record['stage_sub_category']
+        s3_path = record['STAGE_SUB_CATEGORY']
         if not s3_path.startswith('s3://'):
             raise ValueError(f"Invalid S3 path format: {s3_path}")
         
@@ -89,20 +89,20 @@ def s3_check_exists(final_config: Dict[str, Any], record: Dict[str, Any]) -> boo
         )
         
         exists = 'Contents' in response and len(response['Contents']) > 0
-        log.info(f"S3 exists check: {exists}", pipeline_id=record['pipeline_id'])
+        log.info(f"S3 exists check: {exists}", PIPELINE_ID=record['PIPELINE_ID'])
         return exists
         
     except Exception as e:
-        log.exception("S3 exists check failed", pipeline_id=record['pipeline_id'])
+        log.exception("S3 exists check failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 def s3_delete(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
-    """Delete objects from S3 using stage_sub_category from record"""
+    """Delete objects from S3 using STAGE_SUB_CATEGORY from record"""
     try:
         s3 = s3_connection(final_config)
         
         # Get S3 path from record
-        s3_path = record['stage_sub_category']
+        s3_path = record['STAGE_SUB_CATEGORY']
         if not s3_path.startswith('s3://'):
             raise ValueError(f"Invalid S3 path format: {s3_path}")
         
@@ -128,11 +128,11 @@ def s3_delete(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
                     )
                     delete_count += len(objects)
         
-        log.info(f"S3 delete: {delete_count} objects", pipeline_id=record['pipeline_id'])
+        log.info(f"S3 delete: {delete_count} objects", PIPELINE_ID=record['PIPELINE_ID'])
         return True
         
     except Exception as e:
-        log.exception("S3 delete failed", pipeline_id=record['pipeline_id'])
+        log.exception("S3 delete failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 

@@ -28,13 +28,13 @@ def source_to_stage_task(**context):
     """Lock record and execute source to stage transfer"""
     final_config = context['params']['final_config']
     record = context['task_instance'].xcom_pull(task_ids='validate_record_task')
-    dag_run_id = context['dag_run'].dag_id + "_" + context['dag_run'].run_id
+    DAG_RUN_ID = context['dag_run'].dag_id + "_" + context['dag_run'].run_id
     
     # Lock record (Airflow-specific)
-    update_record_fields(record['pipeline_id'], {
-        'dag_run_id': dag_run_id,
-        'pipeline_start_time': get_current_time_iso(final_config['timezone']),
-        'pipeline_status': 'IN_PROGRESS'
+    update_record_fields(record['PIPELINE_ID'], {
+        'DAG_RUN_ID': DAG_RUN_ID,
+        'PIPELINE_START_TIME': get_current_time_iso(final_config['timezone']),
+        'PIPELINE_STATUS': 'IN_PROGRESS'
     }, final_config)
     
     # Execute transfer
@@ -100,7 +100,7 @@ def pick_pending_record_task(**context):
         raise AirflowSkipException("Record is not yet eligible (future window_start_time)")
 
     # ✅ Valid record — proceed
-    log.info("✅ Valid pending record selected", log_key="PickPendingRecord", status="SELECTED", pipeline_id=record['pipeline_id'])
+    log.info("✅ Valid pending record selected", log_key="PickPendingRecord", status="SELECTED", PIPELINE_ID=record['PIPELINE_ID'])
     context['task_instance'].xcom_push(key='validated_record', value=record)
     return record
 

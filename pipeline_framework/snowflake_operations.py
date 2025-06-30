@@ -44,17 +44,17 @@ def snowflake_count(final_config: Dict[str, Any], record: Dict[str, Any]) -> int
             query = f"""
             SELECT COUNT(*) as count
             FROM {final_config['target_database']}.{final_config['target_schema']}.{final_config['target_table']}
-            WHERE FILENAME LIKE  '{record["target_subcategory"]}'
+            WHERE FILENAME LIKE  '{record["TARGET_SUB_CATEGORY"]}'
             """
             
             result = client.execute_scalar_query(query, {})
             count = result['data'] or 0
             
-        log.info(f"Snowflake count: {count}", pipeline_id=record['pipeline_id'])
+        log.info(f"Snowflake count: {count}", PIPELINE_ID=record['PIPELINE_ID'])
         return count
         
     except Exception as e:
-        log.exception("Snowflake count failed", pipeline_id=record['pipeline_id'])
+        log.exception("Snowflake count failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 def snowflake_check_exists(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
@@ -63,7 +63,7 @@ def snowflake_check_exists(final_config: Dict[str, Any], record: Dict[str, Any])
         count = snowflake_count(final_config, record)
         return count > 0
     except Exception as e:
-        log.exception("Snowflake exists check failed", pipeline_id=record['pipeline_id'])
+        log.exception("Snowflake exists check failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise
 
 def snowflake_delete(final_config: Dict[str, Any], record: Dict[str, Any]) -> bool:
@@ -72,14 +72,14 @@ def snowflake_delete(final_config: Dict[str, Any], record: Dict[str, Any]) -> bo
         with snowflake_connection(final_config) as client:
             query = f"""
             DELETE FROM {final_config['target_database']}.{final_config['target_schema']}.{final_config['target_table']}
-            WHERE FILENAME LIKE  '{record["target_subcategory"]}'
+            WHERE FILENAME LIKE  '{record["TARGET_SUB_CATEGORY"]}'
             """
             
             result = client.execute_dml_query(query, {})
             
-        log.info(f"Snowflake delete: {result['rows_affected']} rows", pipeline_id=record['pipeline_id'])
+        log.info(f"Snowflake delete: {result['rows_affected']} rows", PIPELINE_ID=record['PIPELINE_ID'])
         return True
         
     except Exception as e:
-        log.exception("Snowflake delete failed", pipeline_id=record['pipeline_id'])
+        log.exception("Snowflake delete failed", PIPELINE_ID=record['PIPELINE_ID'])
         raise

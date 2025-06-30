@@ -1,51 +1,52 @@
 {
-  "source_id": null,
-  "source_name": "elasticsearch",
-  "source_category": null,
-  "source_sub_category": null,
-  
-  "stage_id": null,
-  "stage_name": "aws_s3",
-  "stage_category": null,
-  "stage_sub_category": null,
-  
-  "target_id": null,
-  "target_name": "snowflake",
-  "target_category": null,
-  "target_sub_category": null,
-  
-  "source_to_stage_ingestion_start_time": null,
-  "source_to_stage_ingestion_end_time": null,
-  "source_to_stage_ingestion_status": "PENDING",
-  
-  "stage_to_target_ingestion_start_time": null,
-  "stage_to_target_ingestion_end_time": null,
-  "stage_to_target_ingestion_status": "PENDING",
-  
-  "audit_start_time": null,
-  "audit_end_time": null,
-  "audit_status": "PENDING",
-  
-  "pipeline_id": null,
-  "pipeline_start_time": null,
-  "pipeline_end_time": null,
-  "pipeline_status": "PENDING",
-  "pipeline_priority": 1.1,
-  
-  "dag_run_id": null,
-  "audit_result": null,
-  "source_count": null,
-  "target_count": null,
-  "count_difference": null,
-  "percentage_difference": null,
-  "completed_phase": null,
-  "retry_attempt": 0,
-  "granularity": null,
-  "window_start_time": null,
-  "window_end_time": null,
-  "target_day":null,
-  "miscellaneous": null,
+  "SOURCE_ID": null,
+  "SOURCE_NAME": "elasticsearch",
+  "SOURCE_CATEGORY": null,
+  "SOURCE_SUB_CATEGORY": null,
 
-  "record_first_created_time": null,
-  "record_last_updated_time": null
+  "STAGE_ID": null,
+  "STAGE_NAME": "aws_s3",
+  "STAGE_CATEGORY": null,
+  "STAGE_SUB_CATEGORY": null,
+
+  "TARGET_ID": null,
+  "TARGET_NAME": "snowflake",
+  "TARGET_CATEGORY": null,
+  "TARGET_SUB_CATEGORY": null,
+
+  "SOURCE_TO_STAGE_INGESTION_START_TIME": null,
+  "SOURCE_TO_STAGE_INGESTION_END_TIME": null,
+  "SOURCE_TO_STAGE_INGESTION_STATUS": "PENDING",
+
+  "STAGE_TO_TARGET_INGESTION_START_TIME": null,
+  "STAGE_TO_TARGET_INGESTION_END_TIME": null,
+  "STAGE_TO_TARGET_INGESTION_STATUS": "PENDING",
+
+  "AUDIT_START_TIME": null,
+  "AUDIT_END_TIME": null,
+  "AUDIT_STATUS": "PENDING",
+  "AUDIT_RESULT": null,
+  
+  "PIPELINE_ID": null,
+  "PIPELINE_START_TIME": null,
+  "PIPELINE_END_TIME": null,
+  "PIPELINE_STATUS": "PENDING",
+  "PIPELINE_PRIORITY": 1.1,
+
+  "DAG_RUN_ID": null,
+
+  "SOURCE_COUNT": null,
+  "TARGET_COUNT": null,
+  "COUNT_DIFFERENCE": null,
+  "PERCENTAGE_DIFFERENCE": null,
+  "COMPLETED_PHASE": null,
+  "RETRY_ATTEMPT": 0,
+  "GRANULARITY": null,
+  "WINDOW_START_TIME": null,
+  "WINDOW_END_TIME": null,
+  "TARGET_DAY": null,
+  "MISCELLANEOUS": null,
+
+  "RECORD_FIRST_CREATED_TIME": null,
+  "RECORD_LAST_UPDATED_TIME": null
 }

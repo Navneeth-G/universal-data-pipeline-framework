@@ -16,9 +16,10 @@ def transfer(final_config, record):
     """Transfer data from stage to target with pre-cleanup, retry support, and consistent status tracking."""
     try:
         #  1. Skip if already completed
-        if record.get('stage_to_target_ingestion_status') == 'COMPLETED':
-            log.info("Stage to Target already marked COMPLETED. Skipping.", pipeline_id=record['pipeline_id'])
+        if record.get('STAGE_TO_TARGET_INGESTION_STATUS') == 'COMPLETED':
+            log.info("Stage to Target already marked COMPLETED. Skipping.", PIPELINE_ID=record['PIPELINE_ID'])
             return True
+        record['STAGE_TO_TARGET_INGESTION_START_TIME'] = get_current_time_iso(final_config['timezone'])
 
         #  2. Clean up target before starting new transfer
         delete_target(final_config, record)
@@ -30,10 +31,9 @@ def transfer(final_config, record):
 
             #  4. On success, mark completed
             record.update({
-                'stage_to_target_ingestion_end_time': get_current_time_iso(final_config['timezone']),
-                'stage_to_target_ingestion_status': 'COMPLETED',
-                'completed_phase': 'STAGE_TO_TARGET',
-                'record_last_updated_time': get_current_time_iso(final_config['timezone'])
+                'STAGE_TO_TARGET_INGESTION_STATUS': 'COMPLETED',
+                'COMPLETED_PHASE': 'STAGE_TO_TARGET',
+                'RECORD_LAST_UPDATED_TIME': get_current_time_iso(final_config['timezone'])
             })
 
             update_record_in_drive_table(record, final_config)
@@ -42,30 +42,30 @@ def transfer(final_config, record):
 
             
   
-            log.info("Stage to Target transfer completed successfully.", pipeline_id=record['pipeline_id'])
+            log.info("Stage to Target transfer completed successfully.", PIPELINE_ID=record['PIPELINE_ID'])
             return True
         else:
             raise RuntimeError("Stage to Target transfer returned failure result.")
 
     except Exception as e:
-        log.exception("Stage to Target transfer failed", pipeline_id=record['pipeline_id'])
+        log.exception("Stage to Target transfer failed", PIPELINE_ID=record['PIPELINE_ID'])
 
         try:
             #  5. Try to clean up again in case partial writes occurred
             delete_target(final_config, record)
         except Exception as cleanup_error:
-            log.warning("Target cleanup after failure also failed", pipeline_id=record['pipeline_id'])
+            log.warning("Target cleanup after failure also failed", PIPELINE_ID=record['PIPELINE_ID'])
 
         #  6. Reset for retry
         record.update({
-            'stage_to_target_ingestion_status': 'PENDING',
-            'stage_to_target_ingestion_start_time': None,
-            'stage_to_target_ingestion_end_time': None,
-            'pipeline_start_time': None,
-            'pipeline_status': 'PENDING',
-            'dag_run_id': None,
-            'retry_attempt': record.get('retry_attempt', 0) + 1,
-            'record_last_updated_time': get_current_time_iso(final_config['timezone'])
+            'STAGE_TO_TARGET_INGESTION_STATUS': 'PENDING',
+            'STAGE_TO_TARGET_INGESTION_START_TIME': None,
+            'STAGE_TO_TARGET_INGESTION_END_TIME': None,
+            'PIPELINE_START_TIME': None,
+            'PIPELINE_STATUS': 'PENDING',
+            'DAG_RUN_ID': None,
+            'RETRY_ATTEMPT': record.get('RETRY_ATTEMPT', 0) + 1,
+            'RECORD_LAST_UPDATED_TIME': get_current_time_iso(final_config['timezone'])
         })
 
         update_record_in_drive_table(record, final_config)

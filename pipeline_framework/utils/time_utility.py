@@ -221,7 +221,7 @@ def to_elasticsearch_format(time_input: Any, es_format: str = "iso", timezone: s
         elif es_format == "epoch_s":
             return str(int(dt.timestamp()))
         elif es_format == "custom_pdt":
-            return dt.format("%Y-%m-%d %H:%M:%S%Z")
+            return dt.format("%Y-%m-%dT%H:%M:%S%Z")
         else:
             log.warning(f"Unknown ES format '{es_format}', defaulting to ISO")
             return iso
