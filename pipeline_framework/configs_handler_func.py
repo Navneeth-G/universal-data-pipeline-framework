@@ -52,8 +52,11 @@ def update_drive_table_keys_only(drive_table: Dict[str, Any], updated_config: Di
     
     return updated_drive_table
 
+
+
+
 def get_final_config(root_project_path: str, team_config_relative_path: str, drive_template_relative_path: str) -> Dict[str, Any]:
-    """Simple config merging with root path support"""
+    """Simple config merging - Airflow variables always included"""
     
     # Build absolute paths
     team_config_path = os.path.join(root_project_path, team_config_relative_path)
@@ -61,7 +64,7 @@ def get_final_config(root_project_path: str, team_config_relative_path: str, dri
     
     # Step 1: Load name.json
     team_config = load_json_file(team_config_path)
-    print(f" Loaded team config: {len(team_config)} keys from {team_config_path}")
+    print(f" Loaded team config: {len(team_config)} keys")
     
     # Step 2: Get host_name and load Airflow variables
     host_name = team_config.get("host_name")
@@ -71,23 +74,25 @@ def get_final_config(root_project_path: str, team_config_relative_path: str, dri
     airflow_vars = get_airflow_variables(host_name)
     print(f" Loaded Airflow variables: {len(airflow_vars)} keys for host: {host_name}")
     
-    # Step 3: Update team config with Airflow values (Airflow priority)
+    # Step 3: ALWAYS merge Airflow variables (union operation)
     updated_config = team_config.copy()
+    
+    # Add ALL Airflow variables, regardless of whether they exist in team config
     for key, value in airflow_vars.items():
         if value is not None and value != "":
-            updated_config[key] = value
+            updated_config[key] = value  # Always add/override
     
-    print(f" Updated config: {len(updated_config)} keys")
+    print(f" Updated config after Airflow merge: {len(updated_config)} keys")
     
     # Step 4: Load drive table template
     drive_template = load_json_file(drive_template_path)
-    print(f" Loaded drive template: {len(drive_template)} keys from {drive_template_path}")
+    print(f" Loaded drive template: {len(drive_template)} keys")
     
-    # Step 5: Update drive table with ONLY existing keys
+    # Step 5: For drive table - only update keys that exist in template
     drive_table_default_record = update_drive_table_keys_only(drive_template, updated_config)
     
     # Step 6: Add drive_table_default_record to final config
     updated_config["drive_table_default_record"] = drive_table_default_record
     
-    print(f"Final config ready: {len(updated_config)} keys")
+    print(f" Final config ready: {len(updated_config)} keys")
     return updated_config
