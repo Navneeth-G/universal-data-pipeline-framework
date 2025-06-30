@@ -354,24 +354,25 @@ def get_oldest_pending_record(final_config: Dict[str, Any], priority: str) -> Op
         "source_sub_category": final_config.get("index_name"),
         "priority": priority
     }
-        # Extract Snowflake configuration
-        snowflake_creds = {
+    # Extract Snowflake configuration
+    snowflake_creds = {
             'account': final_config['snowflake_account'],
             'user': final_config['snowflake_user'],
             'password': final_config['snowflake_password'],
             'role': final_config['snowflake_role'],
             'warehouse': final_config['snowflake_warehouse']
-        }
+            }
         
-        snowflake_config = {
+    snowflake_config = {
             'database': final_config['drive_database'],
             'schema': final_config['drive_schema'],
             'table': final_config['drive_table']
         }
 
     with SnowflakeQueryClient(snowflake_creds, snowflake_config) as client:
-        df = client.execute_query(query, params)
-        if df is not None and not df.empty:
+        result = client.fetch_all_rows_as_dataframe(query, params)
+        df = result.get('data')
+        if df is not None and not df.empty: 
             return df.iloc[0].to_dict()
         return None
 
